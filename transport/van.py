@@ -29,3 +29,4 @@ class Van(Vehicle):
         data["fields"]["vehicles"].append(van_data)
 
         open_database_dump(data) #запись в файл json 
+
