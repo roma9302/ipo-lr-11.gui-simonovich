@@ -1,0 +1,29 @@
+{
+    "company": "transport_company",
+    "fields": {
+        "hangars": 5,
+        "vehicles": [
+            {
+                "type": "van",
+                "vehicle_id": "99247643",
+                "capacity": 5.0,
+                "current_load": 0,
+                "is_refrigerated": true
+            },
+            {
+                "type": "airplane",
+                "vehicle_id": "60060736",
+                "capacity": 120.0,
+                "current_load": 0,
+                "max_altitude": 45.0
+            },
+            {
+                "type": "van",
+                "vehicle_id": "97246423",
+                "capacity": 45.0,
+                "current_load": 0,
+                "is_refrigerated": false
+            }
+        ]
+    }
+}
