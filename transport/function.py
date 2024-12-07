@@ -5,43 +5,44 @@ import json
 
 
 
+
 # валидация(проверка имен/строк на корректность)
 def validate_str(user_input):
-    if user_input.isalpha(): #Проверка (состоит ли аргумент из букв. Если есть хоть 1 эленмент не удовлетворяющий условию -> return None)
+    if user_input.isalpha():
         return user_input
     else:
         print(f"Ошибка: ввод '{user_input}'должен содержать только буквы.")
         return None
 
-
-
 #Валидация(проверка на содержание одних лишь цифр)
 def validate_number(user_input):
     try:
-        float_value = float(user_input) #Если аргумент можно представить в виде float значения идем дальше.
-        if float_value < 0:  #Если наше float значение меньше  0 -> return None .
+        float_value = float(user_input)
+        if float_value < 0:
             print(f"Ошибка: ввод '{user_input}' должен быть неотрицательным числом/нулевым ")
-            return None   
-        return float_value  # Нет -> return value
+            return None
+        return float_value  
     except ValueError:
         print(f"Ошибка: ввод '{user_input}' должен содержать число")
-        return None # Нет -> return None
+        return None
 
 
-#Генерация случайной строки (уникальный идентификатор  для клиента и т/с (строка, генерируется случайно при создание))
+#Генерация случайной строки (уникальный идентификатор (строка, генерируется случайно при создание))
 def generate():
     random_number = str(r.randint(1000, 99999999)) 
 
-    repeat_client= open_clients_load()
-    repeat_database = open_database_load()
-    repeat_completed= open_completed_load()
+    with open('transport/list_id.txt', 'r', encoding='utf-8') as file:
+        repeat = file.read().splitlines()  
 
-    while random_number in repeat_client or random_number in repeat_database or random_number in repeat_completed:  #Продолжает генерировать новый айди пока он не станет уникальным 
+    while random_number in repeat:
         random_number = str(r.randint(1000, 99999999))
+
+    with open('transport/list_id.txt', 'a', encoding='utf-8') as file:
+        file.write(random_number + '\n')
     return random_number
 
 
-#Сортировка грузов клиентов (Внутрення функция для optimize)
+
 def sort_cargo(clients):
     for i in range(len(clients)):
         for j in range(0, len(clients)-i-1):
@@ -50,100 +51,197 @@ def sort_cargo(clients):
     return clients
 
 
-#функции чтения и записи json
-def open_database_load():
-    with open("transport/database.json", 'r', encoding='utf-8') as file:
-        vehicles_data = json.load(file)
-        return vehicles_data
-
-def open_database_dump(vehicles_data):
-    with open("transport/database.json", 'w', encoding='utf-8') as outfile:
-        json.dump(vehicles_data, outfile, ensure_ascii=False, indent=4)
-
-def open_clients_load():
-    with open('transport/clients.json', 'r', encoding='utf-8') as file:
-        clients_data = json.load(file)
-        return clients_data
-
-def open_clients_dump(clients_data):
-    with open('transport/clients.json', 'w', encoding='utf-8') as output:
-        json.dump(clients_data, output, ensure_ascii=False, indent=4)
-
-def open_completed_load():
-    with open('transport/completed_cargo.json', 'r', encoding='utf-8') as file:
-        completed_cargo = json.load(file)    
-        return completed_cargo
-
-def open_completed_dump(completed_cargo):
-    with open('transport/completed_cargo.json', 'w', encoding='utf-8') as output:
-        json.dump(completed_cargo, output, ensure_ascii=False, indent=4)    
 
 
 
-#Функция сбора клиентов для  дальнейших функций
 def output_client():
-    try:
-        clients = open_clients_load()
-            # Проверка clients и его наличия
-        if 'clients' not in clients or not clients['clients']:
-            return []  
+    with open("transport/clients.json", 'r', encoding='utf-8') as file:
+        try:
+            clients = json.load(file)
+            for client in clients['clients']:
+                print(f"""
+                        Клиент {client['client']['name']}
+                        Вес груза {client['client']['cargo_weight']}
+                        Вип клиент {client['client']['is_vip']} 
+                        Номер клиента в базе данных {client['client']['client_id']}
+                        """)
+        except:
+            print("Возникла ошибка. Проверьте наличие транспорта ")
+            
 
-        return clients['clients']  
-
-    except:
-        print("Возникла ошибка. Проверьте наличие клиентов ")
-
-def del_client(client_id):
-        clients_data = open_clients_load()
-        clients = clients_data['clients']
-        clients_data['clients'] = [client for client in clients if client['client']['client_id'] != str(client_id)]  #исключения не подходящих условию
-        open_clients_dump(clients_data)
-
-
-def del_vehicle(vehicle_id):
-    vehicles_data = open_database_load()
-    vehicles = vehicles_data['fields']['vehicles']
-    vehicles_data['fields']['vehicles'] = [vehicle for vehicle in vehicles if vehicle['vehicle_id'] != str(vehicle_id)] #исключения не подходящих условию
-    open_database_dump(vehicles_data)
-
-
-
-
-#Функция добавления клиентов
 def add_completed_client(client_data,vehicle):
     try:
-        data = open_clients_load()
-        if "clients" not in data:
-            data = {"clients": []}  #Если файл пустой. Создание начальной структуры
+        with open("transport/completed_cargo.json", 'r', encoding='utf-8') as file:
+            data = json.load(file)
+            if "clients" not in data:
+                data = {"clients": []}
                 
-#Если в файле неправильная структура . Создание начальной структуры
     except Exception:
-        data = {"clients": []}     
-
-#Создание структуры готового файла
+        data = {"clients": []}              
     client_completed_cargo = {
         "client": client_data,
         "vehicle": vehicle
     }
 
+
     data["clients"].append(client_completed_cargo)
-    open_completed_dump(data)
+
+
+    with open('transport/completed_cargo.json', 'w', encoding='utf-8') as file:
+        json.dump(data, file, ensure_ascii=False, indent=2)
 
 
 
-#Вывод загруженых клиентов из файла 
 def output_completed_client():
-    clients_completed = []  # Инициализация списка загруженных клиентов
     try:
-        clients_completed = open_completed_load() # Загрузка данных
+        with open("transport/completed_cargo.json", 'r', encoding='utf-8') as file:
+            clients_completed = json.load(file)
+            for client in clients_completed['clients']:
+                print(f"""
+                        Клиент {client['client']['name']}
+                        Вес груза {client['client']['cargo_weight']}
+                        Вип клиент {client['client']['is_vip']} 
+                        Номер клиента в базе данных {client['client']['client_id']}
+                        Т/С в которую загружен груз клиента {client['vehicle']}
+                        """)
+    except:
+        print("Загруженых клиентов нет")
+
+
+
+
+def example():
+    print("""
+    Добавление нового т/с:
+          1)тип (van/airplane)
+          2)Грузоподьемность (200, 200.4) в тоннах
+          3)Если тип van:
+            Есть ли холодильник (да/нет)       
+          Если airplane:
+            Максимальная высота полета(200,200.3)
+    Добавление Клиента:
+          1) Имя Клиета (Рома)
+          2)Вес груза (200,200.5)
+          3) Vip клиент (да,нет) По умолчанию нет          
+        """)
     
-        # Проверка наличия clients 
-        if 'clients' not in clients_completed or not clients_completed['clients']:
-            return []  
 
-        return clients_completed['clients']  
-    except Exception as e:
-        print(f"Возникла ошибка: {str(e)}")
-        return []
+    
+def menu():
+    print("""
+        1)Управление ангаром
+        2)Добавить клиента
+        3)Добавить Т/С 
+        4)Вывести список  доступных клиентов 
+        5)Список клиентов, чьи грузы загружены 
+        6)Вывести список доступного транспорта
+        7)Автоматическое распределение грузов
+        8)Ручное управление грузами 
+        9)Выгрузка грузов
+        10)Пример заполнения форм
+        11) Выход """)
+    
 
 
+
+
+def unloading_caro():
+    try:
+        print("Все грузы отправлены на разгрузку. Для выполнения следующего действия подождите 5 секунд ")
+        seconds = 5
+        while seconds > 0:
+            if seconds == 5:
+                print("5 секунд осталось")
+            elif seconds == 4:
+                print("4 секунды осталось")
+            elif seconds == 3:
+                print("3 секунды осталось")
+            elif seconds == 2:
+                print("2 секунды осталось")
+            elif seconds == 1:
+                print("1 секунда осталась")
+            
+            time.sleep(1) 
+            seconds -= 1
+
+        print("Все грузы были успешно отгружены!")
+
+        with open("transport/database.json", 'r', encoding='utf-8') as file:
+            vehicles_data = json.load(file)
+            vehicles = vehicles_data["fields"]["vehicles"]
+            
+            for vehicle_data in vehicles:
+                if vehicle_data['current_load'] > 0:
+                    vehicle_data['current_load'] = 0
+
+                    with open("transport/database.json", 'w', encoding='utf-8') as outfile:
+                        json.dump(vehicles_data, outfile, ensure_ascii=False, indent=4)
+
+        with open("transport/completed_cargo.json", 'r', encoding='utf-8') as file:
+                clients_completed = json.load(file)
+                clients_completed['clients'] = [] 
+
+                with open("transport/completed_cargo.json", 'w', encoding='utf-8') as outfile:
+                    json.dump(clients_completed, outfile, ensure_ascii=False, indent=4)
+    except:
+        print("Ошибка при разгрузке т/с. Проверьте их загруженность ")
+
+
+
+def optimize():
+    try:
+        with open('transport/clients.json', 'r', encoding='utf-8') as file:
+            clients_data = json.load(file)
+
+        with open('transport/database.json', 'r', encoding='utf-8') as file:
+            vehicles_data = json.load(file)
+
+        try:
+            with open('transport/completed_cargo.json', 'r', encoding='utf-8') as file:
+                completed_cargo = json.load(file)
+        except Exception:
+            completed_cargo = {"clients": []}
+
+        vehicles = vehicles_data['fields']['vehicles']
+
+        vip_clients = []
+        clients_non_vip = []
+
+        for client in clients_data['clients']:
+            cargo_weight = int(client['client']['cargo_weight'])
+            if client['client']['is_vip']:
+                vip_clients.append((client, cargo_weight))
+            else:
+                clients_non_vip.append((client, cargo_weight))
+
+
+        sort_cargo(vip_clients)
+        sort_cargo(clients_non_vip)
+
+        sorted_clients = vip_clients + clients_non_vip
+
+        for client, cargo_weight in sorted_clients:
+            for vehicle in vehicles:
+                if float(cargo_weight) <= float(vehicle['capacity']) - vehicle['current_load']:
+                    vehicle['current_load'] += float(cargo_weight)
+                    completed_cargo["clients"].append({
+                        "client": client['client'],
+                        "vehicle": vehicle['vehicle_id']
+                    })
+                    clients_data['clients'].remove(client)
+                    break
+
+        with open('transport/clients.json', 'w', encoding='utf-8') as output:
+            json.dump(clients_data, output, ensure_ascii=False, indent=4)
+
+        with open('transport/database.json', 'w', encoding='utf-8') as output:
+            json.dump(vehicles_data, output, ensure_ascii=False, indent=4)
+
+        # Сохраняем обновленные загруженные клиенты
+        with open('transport/completed_cargo.json', 'w', encoding='utf-8') as output:
+            json.dump(completed_cargo, output, ensure_ascii=False, indent=4)
+
+        for item in completed_cargo["clients"]:
+            print(f"Клиент: {item['client']['name']} загружен в транспортное средство ID: {item['vehicle']} с весом груза: {item['client']['cargo_weight']}")
+    except:
+        print("Ошибка при автоматическом распределениии . Проверьте наличие клиентов и свободных т/с")

@@ -1,35 +1,28 @@
 {
     "company": "transport_company",
     "fields": {
-        "hangars": 7,
+        "hangars": 5,
         "vehicles": [
+            {
+                "type": "van",
+                "vehicle_id": "99247643",
+                "capacity": 5.0,
+                "current_load": 0,
+                "is_refrigerated": true
+            },
             {
                 "type": "airplane",
                 "vehicle_id": "60060736",
-                "capacity": 5.0,
+                "capacity": 120.0,
                 "current_load": 0,
-                "max_altitude": 300.0
+                "max_altitude": 45.0
             },
             {
                 "type": "van",
-                "vehicle_id": "82604672",
-                "capacity": 56.0,
+                "vehicle_id": "97246423",
+                "capacity": 45.0,
                 "current_load": 0,
-                "is_refrigerated": "нет"
-            },
-            {
-                "type": "van",
-                "vehicle_id": "29317779",
-                "capacity": 3.0,
-                "current_load": 0,
-                "is_refrigerated": "да"
-            },
-            {
-                "type": "airplane",
-                "vehicle_id": "24441035",
-                "capacity": 5.0,
-                "current_load": 0,
-                "max_altitude": 44.0
+                "is_refrigerated": false
             }
         ]
     }

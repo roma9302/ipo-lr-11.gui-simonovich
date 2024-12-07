@@ -6,7 +6,6 @@ class Van(Vehicle):
         super().__init__(capacity, current_load, clients_list)
         self.is_refrigerated = True if is_refrigerated.lower() == "да" else False
 
-        #Словарь для записи обьекта класса в файл
         van_data = {
             "type": 'van',
             "vehicle_id": self.vehicle_id, 
@@ -16,17 +15,16 @@ class Van(Vehicle):
         }
 
         try:
-            data = open_database_load()
-                
-            #если структуры нет в файле создаем ее
-            if "fields" not in data or "vehicles" not in data["fields"]:
-                data = {"company": "transport_company", "fields": {"vehicles": []}}
-
-        #Если структура с ошибкой обновляем ее
+            with open("transport/database.json", 'r', encoding='utf-8') as file:
+                data = json.load(file)
+                if "fields" not in data or "vehicles" not in data["fields"]:
+                    data = {"company": "transport_company", "fields": {"vehicles": []}}
         except Exception:
             data = {"company": "transport_company", "fields": {"vehicles": []}}
 
         data["fields"]["vehicles"].append(van_data)
 
         open_database_dump(data) #запись в файл json 
+
+
 

@@ -17,39 +17,43 @@ class Vehicle:
 
         
     def load_cargo(self):
+        try:
+            output_client()
+            client_id = str(input("Введите айди клиента "))
 
-        client_id = str(input("Введите айди клиента "))
+            with open("transport/clients.json", 'r', encoding='utf-8') as file:
+                clients = json.load(file)
+                for client in clients['clients']:
+                    if client_id == client['client']['client_id']:
+                        client_cargo = client['client']['cargo_weight']
 
-        clients = open_clients_load
-            
-        #Перебор клиента для получения клиентского груза
-        for client in clients['clients']:
-            if client_id == client['client']['client_id']:
-                client_cargo = client['client']['cargo_weight']
+                        company.list_vehicles()
+                        id_vehicle = str(input("Введите идентификационный номер т/с: "))
+                        with open("transport/database.json", 'r', encoding='utf-8') as file:
+                            vehicles_data = json.load(file)
+                            vehicles = vehicles_data["fields"]["vehicles"]
 
-                #Вывод списка т/с из класса
-                company.list_vehicles()
-                id_vehicle = str(input("Введите идентификационный номер т/с: "))
+                            for vehicle_data in vehicles:
+                                if id_vehicle == vehicle_data['vehicle_id']:
+                                    if float(client_cargo) <= float(vehicle_data['capacity']):
+                                        if float(vehicle_data['capacity']) >= float(vehicle_data['current_load']) + float(client_cargo):
+                                            vehicle_data['current_load'] += float(client_cargo)
+                                            add_completed_client(client['client'], vehicle_data['vehicle_id'])
+                                            clients['clients'].remove(client) 
 
-                #Получение т/с по отдельности из файла
-                vehicles_data = open_database_load()
-                vehicles = vehicles_data["fields"]["vehicles"]
+                                            with open("transport/clients.json", 'w', encoding='utf-8') as outfile:
+                                                json.dump(clients, outfile, ensure_ascii=False, indent=4)
+                                            print("Клиент успешно загружен ")
+                                        else:
+                                            print(f"Груз {client_cargo} превышает грузоподъемность т/с {vehicle_data['capacity']}.")
+                                    else:
+                                        print(f"Груз {client_cargo} превышает грузоподъемность т/с {vehicle_data['capacity']}.")
+                                    
+                                    with open("transport/database.json", 'w', encoding='utf-8') as outfile:
+                                        json.dump(vehicles_data, outfile, ensure_ascii=False, indent=4)
 
-                for vehicle_data in vehicles:
-                    if id_vehicle == vehicle_data['vehicle_id']:  
-                        if float(client_cargo) <= float(vehicle_data['capacity']): #Если груз не превышет грузоподьемность
-                            if float(vehicle_data['capacity']) >= float(vehicle_data['current_load']) + float(client_cargo): #Если груз+текущая загруженность т/с не превышает грузоподьемность
-                                vehicle_data['current_load'] += float(client_cargo)
-                                #Добавляем клиента в лист загруженных клиентов(функция в function.py) принимет словарь клиент и айди т/с в который был загружен груз
-                                add_completed_client(client['client'], vehicle_data['vehicle_id'])
-                                #Удаление клиента из списка доступных
-                                clients['clients'].remove(client) 
-
-                                open_clients_dump(clients)
-                        
-                        open_database_load(vehicles_data)
-
-
+        except :
+            print(f"Ошибка при ручной загрузке: Проверьте наличие т/с и клиента.")
 
 
 
