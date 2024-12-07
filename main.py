@@ -224,8 +224,8 @@ def add_new_vehicle():
                         status_label_update("Данные транспортного средства добавлены.")
                     else:
                         messagebox.showerror("Ошибка", "Мест в ангаре нет.")
-            except Exception as e:
-                messagebox.showerror("Ошибка", f"Ошибка при добавлении транспортного средства: {e}")
+            except Exception :
+                messagebox.showerror("Ошибка", f"Ошибка при добавлении транспортного средства: ")
         else:
             messagebox.showerror("Ошибка", "Некорректные данные. Транспортное средство не добавлено.")
             status_label_update("Ошибка. Транспортное средство не добавлено.")
