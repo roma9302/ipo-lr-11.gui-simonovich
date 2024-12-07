@@ -5,7 +5,7 @@ from transport.transport_company import TransportCompany
 from transport.vehicle import *
 import json
 
-close = True
+
 company = TransportCompany("Транспортная компания")
 
 

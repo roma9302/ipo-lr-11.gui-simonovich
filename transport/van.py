@@ -24,5 +24,7 @@ class Van(Vehicle):
 
         data["fields"]["vehicles"].append(van_data)
 
-        with open('transport/database.json', 'w', encoding='utf-8') as file:
-            json.dump(data, file, ensure_ascii=False, indent=2)
+        open_database_dump(data) #запись в файл json 
+
+
+
