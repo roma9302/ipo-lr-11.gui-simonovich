@@ -8,7 +8,7 @@ from transport.van import Van
 from transport.airplane import Airplane
 from transport.transport_company import TransportCompany
 from transport.vehicle import *
-from transport.hangar import *
+from transport.hangar import Hangar
 import json
 
 
