@@ -38,40 +38,17 @@ def update_label_hangar():
 
 
 # класс ангар
-class Hangar:
-    #метод для добавление к ангарам +1
-    def hangar_add():
-        vehicles_data = open_database_load()
-        vehicles_data['fields']['hangars'] += 1  #Добавление к ангарам 1
-        open_database_dump(vehicles_data)
-        update_label_hangar()  # обновление лейбла
-        status_label_update("ангар добавлен")  # вывод в статус бар
+def hangar_add_load():
+    Hangar.hangar_add()
+    update_label_hangar()  # обновление лейбла
+    status_label_update("ангар добавлен") 
 
-    # Метод для удаление ангаров -1
-    def hangar_del():
-            vehicles_data = open_database_load() # чтение данных json
-            counter = 0 # счетчик кол-ва т/с
-            
-            #Нахождение количества т/с в файле
-            for a in vehicles_data['fields']['vehicles'] :
-                counter +=1 
-                
-            #Проверка если удалить ангар будет ли хватать места на все машины
-            if vehicles_data['fields']['hangars'] - 1 >= counter:
-                vehicles_data['fields']['hangars'] -= 1 
-                status_label_update("ангар удален.")
-                
-                open_database_dump(vehicles_data) # обновление файла json
-                update_label_hangar() # обнвление лейбла
-                    
-            else:
-                messagebox.showerror("Ошибка", "транспорта слишком много . Удалите сперва т/с") # уведомление об ошибке
-                status_label_update("транспорта слишком много . Удалите сперва т/с") # обновление статус бара
-
-    # счетчик количства ангаров
-    def hangar_count():
-        hangar_count = open_database_load()
-        return hangar_count['fields']['hangars']
+def hangar_del_load():
+        if Hangar.hangar_del() == 2:
+            status_label_update("ангар удален.")
+            update_label_hangar() 
+        else:
+            messagebox.showerror("Ошибка", "Слишком много т/с")
             
 
 # обновление таблицы 
@@ -577,9 +554,9 @@ delete_vehicle_button = ttk.Button(vehicle_frame, text="Удалить т/с", c
 delete_vehicle_button.pack(pady=10)
 add_vehicle_button = ttk.Button(vehicle_frame, text="Добавить т/с", command=add_new_vehicle)
 add_vehicle_button.pack(pady=10 )
-add_hangar_button = ttk.Button(vehicle_frame, text="Добавить ангар", command=Hangar.hangar_add)
+add_hangar_button = ttk.Button(vehicle_frame, text="Добавить ангар", command=hangar_add_load)
 add_hangar_button.pack(pady=10 )
-del_hangar_button = ttk.Button(vehicle_frame, text="Удлалить ангар", command=Hangar.hangar_del)
+del_hangar_button = ttk.Button(vehicle_frame, text="Удлалить ангар", command=hangar_del_load)
 del_hangar_button.pack(pady=10 )
 
 
